@@ -13,10 +13,23 @@ Template.team.events({
     'submit form.form-edit': function(e,tpl) {
         e.preventDefault();
 
-        const teamName = tpl.$('input[name=name]').val();
+        const teamName = tpl.$("input[name='name']").val();
         const self = this;
 
         if(teamName.length) {
+            Meteor.call("teamUpdate", this._id, teamName, function(error) {
+                if (error) {
+                    alert(error.reason);
+                    Session.set('editedTeamId', self._id);
+                    Tracker.afterFlush(function() {
+                        tpl.$("input[name='name']").val(teamName);
+                        tpl.$("input[name='name']").focus();
+                    });
+                }
+            });
+
+            Session.set('isEditingTeam', null);
+            /*
             Teams.update(this._id, {$set: {name:teamName}}, function(error) {
 
                 if (!error) {
@@ -34,7 +47,7 @@ Template.team.events({
                     }
                 }
             });
-            Session.set('editedTeamId',null);
+            Session.set('editedTeamId',null); */
         }
     },
 
